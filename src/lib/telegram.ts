@@ -20,12 +20,12 @@ export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   groups: {
     tech: [
       "-1004456666849", // USA Tech Jobs & Software Careers (Channel)
+      "-1004428862449", // US JOBS IN IT (Channel - @usjobsinit)
       "-1004318742358", // USA Tech Jobs Community & Referrals (Group)
       "-1003882722879", // US JOBS AND OPT - IT DOMAIN (Group - @usafulltimejobs)
     ],
     non_tech: [
       "-1004474267352", // USA Non-Tech & Corporate Jobs (Channel)
-      "-1004428862449", // US JOBS - H1B - NON TECH DOMAIN (Channel - @usjobsinit)
       "-1004406851780", // US JOBS, H1B - FULL TIME JOBS (Channel - @nonitjobsinus)
       "-1004462814167", // USA Non-Tech Career Hub (Group)
       "-1004305785977", // US JOB OPORTUNITY - NON IT (Group)
