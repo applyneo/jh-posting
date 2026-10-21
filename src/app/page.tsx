@@ -7,6 +7,7 @@ import { JobCard } from "@/components/JobCard";
 import { JobModal } from "@/components/JobModal";
 import { SavedJobsDrawer } from "@/components/SavedJobsDrawer";
 import { TelegramAdminModal } from "@/components/TelegramAdminModal";
+import { BackendSheetModal } from "@/components/BackendSheetModal";
 import { PasswordGate } from "@/components/PasswordGate";
 import { Job, SearchResponse } from "@/types/job";
 import {
@@ -22,6 +23,7 @@ import {
   FileSpreadsheet,
   Settings,
   PlusCircle,
+  Download,
 } from "lucide-react";
 
 const INITIAL_FILTERS: FilterState = {
@@ -59,6 +61,7 @@ export default function HomePage() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
   const [isSavedDrawerOpen, setIsSavedDrawerOpen] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
+  const [isSheetModalOpen, setIsSheetModalOpen] = useState(false);
 
   // Dashboard password gate state (Chitu@123)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -251,6 +254,7 @@ export default function HomePage() {
         onOpenSaved={() => setIsSavedDrawerOpen(true)}
         onOpenTelegram={() => setIsTelegramModalOpen(true)}
         onOpenAddGroup={() => setIsTelegramModalOpen(true)}
+        onOpenSheet={() => setIsSheetModalOpen(true)}
         onLock={handleLock}
       />
 
@@ -302,6 +306,15 @@ export default function HomePage() {
                 </button>
 
                 <button
+                  onClick={() => setIsSheetModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition active:scale-95 shadow-sm"
+                  title="View live Backend Sheet & Ledger"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  <span>View Backend Sheet</span>
+                </button>
+
+                <button
                   onClick={() => setIsTelegramModalOpen(true)}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition"
                   title="Configure Telegram destinations and view details"
@@ -345,13 +358,20 @@ export default function HomePage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-emerald-900/40 text-xs">
+                    <button
+                      onClick={() => setIsSheetModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/50 bg-emerald-900/60 px-3 py-1.5 text-emerald-200 font-medium hover:bg-emerald-800 transition"
+                    >
+                      <FileSpreadsheet className="h-3.5 w-3.5" />
+                      <span>Open Backend Sheet</span>
+                    </button>
                     <a
                       href="/api/telegram/download-excel"
                       download="JobHunger_Telegram_Posting_Ledger.xlsx"
                       className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 transition shadow-sm"
                     >
-                      <FileSpreadsheet className="h-3.5 w-3.5" />
-                      <span>Download Backend Excel Ledger (.xlsx)</span>
+                      <Download className="h-3.5 w-3.5" />
+                      <span>Download Excel (.xlsx)</span>
                     </a>
                   </div>
                 </div>
@@ -604,6 +624,12 @@ export default function HomePage() {
       <TelegramAdminModal
         isOpen={isTelegramModalOpen}
         onClose={() => setIsTelegramModalOpen(false)}
+      />
+
+      {/* Backend Spreadsheet & Ledger Modal */}
+      <BackendSheetModal
+        isOpen={isSheetModalOpen}
+        onClose={() => setIsSheetModalOpen(false)}
       />
     </div>
   );

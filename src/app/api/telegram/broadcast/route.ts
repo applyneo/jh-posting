@@ -12,6 +12,7 @@ import {
 } from "@/lib/telegram";
 import { recordPostsToExcel, JobPostRecord } from "@/lib/excel_logger";
 import { syncToGoogleSheet } from "@/lib/google_sheet_logger";
+import { appendSheetRows, getPostedSlugs, SheetJobRow } from "@/lib/sheet_backend";
 import { Job } from "@/types/job";
 
 const FREEHIRE_API = "https://freehire.me/api/v1/agent/jobs/search";
@@ -73,12 +74,13 @@ export async function POST(req: NextRequest) {
       healthcare: customConfig.groups?.healthcare || DEFAULT_TELEGRAM_CONFIG.groups.healthcare,
     };
 
-    const history = getPostedHistory();
+    const history = new Set([...getPostedSlugs(), ...getPostedHistory()]);
     const newlyPosted: string[] = [];
     const results: Array<{ domain: string; title: string; company: string; status: string; chatCount: number }> = [];
     const excelRecords: JobPostRecord[] = [];
+    const sheetRows: SheetJobRow[] = [];
 
-    // Helper to extract clean fields for Excel
+    // Helper to extract clean fields for Excel and Backend Sheet
     const formatRecord = (job: Job, domain: "tech" | "non_tech" | "healthcare", sentCount: number, targets: string[]): JobPostRecord => {
       const enrichment = job.enrichment || {};
       const isRemote =
@@ -117,6 +119,43 @@ export async function POST(req: NextRequest) {
       };
     };
 
+    const toSheetRow = (rec: JobPostRecord, slug: string): SheetJobRow => {
+      const now = new Date();
+      const istDate = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(now);
+
+      const istTime = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }).format(now);
+
+      return {
+        id: `jh-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        slug,
+        postedDate: istDate,
+        postedTime: `${istTime} IST`,
+        category: rec.domain,
+        title: rec.title,
+        company: rec.company,
+        location: rec.location,
+        workMode: rec.workMode,
+        jobType: rec.jobType,
+        salary: rec.salary,
+        experience: rec.experience,
+        applyUrl: rec.applyUrl,
+        deliveredToCount: rec.chatCount,
+        chatIds: rec.chatIds,
+        status: rec.status,
+      };
+    };
+
     // 1. Tech jobs
     const techJobs = await fetchDomainJobs(
       "Software Engineer",
@@ -143,7 +182,9 @@ export async function POST(req: NextRequest) {
         status: sentCount > 0 ? "success" : "failed",
         chatCount: sentCount,
       });
-      excelRecords.push(formatRecord(job, "tech", sentCount, groups.tech));
+      const rec = formatRecord(job, "tech", sentCount, groups.tech);
+      excelRecords.push(rec);
+      sheetRows.push(toSheetRow(rec, job.public_slug));
     }
 
     // 2. Non-Tech jobs
@@ -172,7 +213,9 @@ export async function POST(req: NextRequest) {
         status: sentCount > 0 ? "success" : "failed",
         chatCount: sentCount,
       });
-      excelRecords.push(formatRecord(job, "non_tech", sentCount, groups.non_tech));
+      const rec = formatRecord(job, "non_tech", sentCount, groups.non_tech);
+      excelRecords.push(rec);
+      sheetRows.push(toSheetRow(rec, job.public_slug));
     }
 
     // 3. Healthcare jobs
@@ -201,9 +244,13 @@ export async function POST(req: NextRequest) {
         status: sentCount > 0 ? "success" : "failed",
         chatCount: sentCount,
       });
-      excelRecords.push(formatRecord(job, "healthcare", sentCount, groups.healthcare));
+      const rec = formatRecord(job, "healthcare", sentCount, groups.healthcare);
+      excelRecords.push(rec);
+      sheetRows.push(toSheetRow(rec, job.public_slug));
     }
 
+    // Append to backend sheet database directly
+    appendSheetRows(sheetRows);
     savePostedHistory(newlyPosted);
     recordPostsToExcel(excelRecords);
 

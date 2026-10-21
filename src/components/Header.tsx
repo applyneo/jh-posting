@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send, Lock, PlusCircle, Users } from "lucide-react";
+import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send, Lock, PlusCircle, Users, FileSpreadsheet } from "lucide-react";
 
 interface HeaderProps {
   totalJobs?: number;
@@ -9,6 +9,7 @@ interface HeaderProps {
   onOpenSaved: () => void;
   onOpenTelegram: () => void;
   onOpenAddGroup?: () => void;
+  onOpenSheet?: () => void;
   onLock?: () => void;
 }
 
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSaved,
   onOpenTelegram,
   onOpenAddGroup,
+  onOpenSheet,
   onLock,
 }) => {
   return (
@@ -53,6 +55,18 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Backend Sheet button */}
+          {onOpenSheet && (
+            <button
+              onClick={onOpenSheet}
+              className="flex items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition active:scale-95"
+              title="Open Backend Spreadsheet & Ledger"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Backend Sheet</span>
+            </button>
+          )}
+
           {/* Telegram Auto-Poster button */}
           <button
             onClick={onOpenTelegram}
