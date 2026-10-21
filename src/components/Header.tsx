@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send } from "lucide-react";
+import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send, Lock } from "lucide-react";
 
 interface HeaderProps {
   totalJobs?: number;
   savedCount: number;
   onOpenSaved: () => void;
   onOpenTelegram: () => void;
+  onLock?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   savedCount,
   onOpenSaved,
   onOpenTelegram,
+  onLock,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
@@ -84,6 +86,18 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline">CLI Repo</span>
             <ExternalLink className="h-3 w-3 text-slate-500" />
           </a>
+
+          {/* Lock Dashboard */}
+          {onLock && (
+            <button
+              onClick={onLock}
+              className="group flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900/80 px-2.5 py-1.5 text-xs font-medium text-slate-400 transition hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-300"
+              title="Lock Dashboard"
+            >
+              <Lock className="h-3.5 w-3.5 text-slate-400 group-hover:text-rose-400 transition" />
+              <span className="hidden sm:inline">Lock</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

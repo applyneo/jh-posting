@@ -12,10 +12,14 @@ import {
   Loader2,
   Settings,
   Eye,
+  EyeOff,
   Sparkles,
   ShieldCheck,
   FileSpreadsheet,
   Download,
+  Lock,
+  KeyRound,
+  LogOut,
 } from "lucide-react";
 
 interface TelegramAdminModalProps {
@@ -23,7 +27,14 @@ interface TelegramAdminModalProps {
   onClose: () => void;
 }
 
+const ADMIN_PASSWORD = "Chitu@123";
+
 export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, onClose }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState("");
+
   const [techGroups, setTechGroups] = useState<string[]>([
     "-1004456666849", // USA Tech Channel
     "-5336777738",    // USA Tech Group
@@ -47,6 +58,41 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
     totalDelivered?: number;
     jobs?: any[];
   } | null>(null);
+
+  // Check saved session auth
+  useEffect(() => {
+    try {
+      if (
+        sessionStorage.getItem("jh_admin_auth") === "true" ||
+        localStorage.getItem("jh_admin_auth") === "true"
+      ) {
+        setIsAuthenticated(true);
+      }
+    } catch {}
+  }, [isOpen]);
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setAuthError("");
+      try {
+        sessionStorage.setItem("jh_admin_auth", "true");
+        localStorage.setItem("jh_admin_auth", "true");
+      } catch {}
+    } else {
+      setAuthError("Incorrect password. Please try again.");
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setPasswordInput("");
+    try {
+      sessionStorage.removeItem("jh_admin_auth");
+      localStorage.removeItem("jh_admin_auth");
+    } catch {}
+  };
 
   // Load saved custom groups from localStorage
   useEffect(() => {
@@ -111,7 +157,10 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
     try {
       const res = await fetch("/api/telegram/broadcast", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": ADMIN_PASSWORD,
+        },
         body: JSON.stringify({
           groups: {
             tech: techGroups,
@@ -134,6 +183,86 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
   };
 
   if (!isOpen) return null;
+
+  // Render Password Lock Screen if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+
+        {/* Lock Modal */}
+        <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+                <Lock className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-white">Admin Verification</h4>
+                <p className="text-[11px] text-slate-400">JobHunger Broadcast Control</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="text-center space-y-2">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-inner">
+              <KeyRound className="h-7 w-7" />
+            </div>
+            <h3 className="text-lg font-bold text-white">Enter Admin Password</h3>
+            <p className="text-xs text-slate-400 max-w-xs mx-auto">
+              Please enter your password to access the Telegram poster, manage groups, and download the Excel ledger.
+            </p>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div>
+              <div className="relative flex items-center">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    if (authError) setAuthError("");
+                  }}
+                  placeholder="Enter admin password..."
+                  autoFocus
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950/80 py-3 pl-4 pr-11 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 text-slate-500 hover:text-slate-300"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {authError && (
+                <p className="mt-2 text-xs font-medium text-rose-400 flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  <span>{authError}</span>
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition active:scale-95"
+            >
+              <span>Unlock Dashboard</span>
+            </button>
+          </form>
+
+          <p className="text-center text-[11px] text-slate-500">
+            Authorized administrators & team members only
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const totalDestinations = techGroups.length + nonTechGroups.length + healthGroups.length;
 
@@ -162,9 +291,19 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white">
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950/60 px-2.5 py-1.5 text-xs text-slate-400 hover:border-slate-700 hover:text-white transition"
+              title="Lock / Logout"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Lock</span>
+            </button>
+            <button onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content Body */}

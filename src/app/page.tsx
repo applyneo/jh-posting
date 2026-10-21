@@ -7,6 +7,7 @@ import { JobCard } from "@/components/JobCard";
 import { JobModal } from "@/components/JobModal";
 import { SavedJobsDrawer } from "@/components/SavedJobsDrawer";
 import { TelegramAdminModal } from "@/components/TelegramAdminModal";
+import { PasswordGate } from "@/components/PasswordGate";
 import { Job, SearchResponse } from "@/types/job";
 import {
   Sparkles,
@@ -55,6 +56,32 @@ export default function HomePage() {
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
   const [isSavedDrawerOpen, setIsSavedDrawerOpen] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
+
+  // Dashboard password gate state (Chitu@123)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    try {
+      const isAuth =
+        localStorage.getItem("jh_admin_auth") === "true" ||
+        sessionStorage.getItem("jh_admin_auth") === "true";
+      setIsAuthenticated(isAuth);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  const handleUnlock = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLock = () => {
+    try {
+      localStorage.removeItem("jh_admin_auth");
+      sessionStorage.removeItem("jh_admin_auth");
+    } catch {}
+    setIsAuthenticated(false);
+  };
 
   // Load saved jobs from localStorage on mount
   useEffect(() => {
@@ -144,6 +171,21 @@ export default function HomePage() {
 
   const totalPages = Math.ceil(total / limit);
 
+  // If checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-9 w-9 text-indigo-500 animate-spin" />
+        <p className="text-xs text-slate-400">Loading JobHunger Dashboard...</p>
+      </div>
+    );
+  }
+
+  // If not authenticated, render Password Gate
+  if (!isAuthenticated) {
+    return <PasswordGate onUnlock={handleUnlock} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col">
       {/* Header */}
@@ -152,6 +194,7 @@ export default function HomePage() {
         savedCount={savedJobs.length}
         onOpenSaved={() => setIsSavedDrawerOpen(true)}
         onOpenTelegram={() => setIsTelegramModalOpen(true)}
+        onLock={handleLock}
       />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
