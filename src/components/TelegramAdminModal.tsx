@@ -37,15 +37,21 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
 
   const [techGroups, setTechGroups] = useState<string[]>([
     "-1004456666849", // USA Tech Channel
-    "-5336777738",    // USA Tech Group
+    "-1004428862449", // US JOBS - IT DOMAIN Channel (@usjobsinit)
+    "-1004318742358", // USA Tech Jobs Community Group
+    "-1003899747167", // US IT JOBS AND INTERVIEW Group (@Jobhungerai)
+    "-1004305785977", // US JOB OPORTUNITY Group
   ]);
   const [nonTechGroups, setNonTechGroups] = useState<string[]>([
     "-1004474267352", // USA Non-Tech Channel
-    "-5460771499",    // USA Non-Tech Group
+    "-1004406851780", // US JOBS - NON IT Channel (@nonitjobsinus)
+    "-1004462814167", // USA Non-Tech Career Hub Group
+    "-1003882722879", // US JOBS AND OPT Group (@usafulltimejobs)
   ]);
   const [healthGroups, setHealthGroups] = useState<string[]>([
     "-1004461057036", // USA Healthcare Channel
-    "-5508137058",    // USA Healthcare Group
+    "-1003942741539", // US JOBS MEDICAL DOMAIN Channel (@usjobsjobs)
+    "-1004475061975", // USA Healthcare Group
   ]);
 
   const [newChatId, setNewChatId] = useState("");

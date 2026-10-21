@@ -18,9 +18,24 @@ export interface TelegramConfig {
 export const DEFAULT_TELEGRAM_CONFIG: TelegramConfig = {
   bot_token: process.env.TELEGRAM_BOT_TOKEN || "8874114044:AAG90TZQB42JdZEH17Ngdeu1hJysQgwF4NU",
   groups: {
-    tech: ["-1004456666849", "-5336777738"],
-    non_tech: ["-1004474267352", "-5460771499"],
-    healthcare: ["-1004461057036", "-5508137058"],
+    tech: [
+      "-1004456666849", // USA Tech Jobs Channel
+      "-1004428862449", // US JOBS - IT DOMAIN Channel (@usjobsinit)
+      "-1004318742358", // USA Tech Jobs Community Group
+      "-1003899747167", // US IT JOBS AND INTERVIEW Group (@Jobhungerai)
+      "-1004305785977", // US JOB OPORTUNITY Group
+    ],
+    non_tech: [
+      "-1004474267352", // USA Non-Tech Channel
+      "-1004406851780", // US JOBS - NON IT Channel (@nonitjobsinus)
+      "-1004462814167", // USA Non-Tech Career Hub Group
+      "-1003882722879", // US JOBS AND OPT Group (@usafulltimejobs)
+    ],
+    healthcare: [
+      "-1004461057036", // USA Healthcare Channel
+      "-1003942741539", // US JOBS MEDICAL DOMAIN Channel (@usjobsjobs)
+      "-1004475061975", // USA Healthcare Group
+    ],
   },
   contact: {
     phone: "8886883699",
