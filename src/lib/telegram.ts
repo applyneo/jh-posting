@@ -179,9 +179,9 @@ export function formatTelegramCard(job: Job, category: "tech" | "non_tech" | "he
   let mandatoryNote = "";
   const lowerDesc = desc ? desc.toLowerCase() : "";
   if (lowerDesc.includes("polygraph") || lowerDesc.includes("ts/sci") || lowerDesc.includes("top secret")) {
-    mandatoryNote = "\n🔐 MANDATORY REQUIREMENT\nActive U.S. Security Clearance (TS/SCI or Secret with Polygraph).";
+    mandatoryNote = "\n\n🔐 MANDATORY REQUIREMENT\nActive U.S. Security Clearance (TS/SCI or Secret with Polygraph).";
   } else if (title.toLowerCase().includes("registered nurse") || lowerDesc.includes("rn license")) {
-    mandatoryNote = "\n🔐 MANDATORY REQUIREMENT\nActive State RN Licensure and BLS/CPR Certification.";
+    mandatoryNote = "\n\n🔐 MANDATORY REQUIREMENT\nActive State RN Licensure and BLS/CPR Certification.";
   }
 
   // Hashtags
@@ -197,23 +197,28 @@ ${domainIcon} ${title.toUpperCase()}
 🏢 Work Mode: ${workMode}
 💰 Salary: ${salaryStr}
 🎯 Experience: ${expStr}
+
 ━━━━━━━━━━━━━━━━━━
 ${skillHeader}
 ${skillsLines}
+
 ━━━━━━━━━━━━━━━━━━
 📋 ABOUT THE ROLE
 Join ${company} to support mission-critical goals and drive excellence.
 ${roleBullets}${mandatoryNote}
+
 ━━━━━━━━━━━━━━━━━━
 🎯 INTERESTED? APPLY NOW!
 🔗 OFFICIAL APPLICATION LINK
 👇 Apply here:
 ${applyUrl}
+
 ━━━━━━━━━━━━━━━━━━
 🤝 NEED JOB ASSISTANCE?
 🌐 Website: https://jobhunger.ai
 📞 Contact: 8886883699
 📧 Email: info@jobhunger.ai
+
 🚀 Find your next opportunity with JobHunger!
 ${hashtags}`;
 }
@@ -254,22 +259,33 @@ export async function sendTelegramMessage(
 // Deduplication store in memory or local file
 let memoryHistory: Set<string> = new Set();
 
+function getHistoryPath(): string {
+  if (process.env.VERCEL) {
+    return path.join("/tmp", "posted_history.json");
+  }
+  return path.join(process.cwd(), "posted_history.json");
+}
+
 export function getPostedHistory(): Set<string> {
-  const historyFile = path.join(process.cwd(), "posted_history.json");
-  try {
-    if (fs.existsSync(historyFile)) {
-      const data = JSON.parse(fs.readFileSync(historyFile, "utf-8"));
-      data.forEach((s: string) => memoryHistory.add(s));
-    }
-  } catch {
-    // serverless filesystem may be read-only or ephemeral
+  const primaryPath = getHistoryPath();
+  const rootPath = path.join(process.cwd(), "posted_history.json");
+
+  for (const p of [primaryPath, rootPath]) {
+    try {
+      if (fs.existsSync(p)) {
+        const data = JSON.parse(fs.readFileSync(p, "utf-8"));
+        if (Array.isArray(data)) {
+          data.forEach((s: string) => memoryHistory.add(s));
+        }
+      }
+    } catch {}
   }
   return memoryHistory;
 }
 
 export function savePostedHistory(newSlugs: string[]) {
   newSlugs.forEach((s) => memoryHistory.add(s));
-  const historyFile = path.join(process.cwd(), "posted_history.json");
+  const historyFile = getHistoryPath();
   try {
     fs.writeFileSync(historyFile, JSON.stringify(Array.from(memoryHistory), null, 2), "utf-8");
   } catch {

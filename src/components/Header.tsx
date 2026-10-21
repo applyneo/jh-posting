@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send, Lock } from "lucide-react";
+import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send, Lock, PlusCircle, Users } from "lucide-react";
 
 interface HeaderProps {
   totalJobs?: number;
   savedCount: number;
   onOpenSaved: () => void;
   onOpenTelegram: () => void;
+  onOpenAddGroup?: () => void;
   onLock?: () => void;
 }
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   savedCount,
   onOpenSaved,
   onOpenTelegram,
+  onOpenAddGroup,
   onLock,
 }) => {
   return (
@@ -75,17 +77,15 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          {/* GitHub link */}
-          <a
-            href="https://github.com/strelov1/freehire-cli"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-700 hover:text-white"
+          {/* Add Group button in place of CLI Repo */}
+          <button
+            onClick={onOpenAddGroup || onOpenTelegram}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-indigo-500/50 hover:bg-slate-800 hover:text-white"
+            title="Add & Manage Telegram Groups/Channels"
           >
-            <Globe2 className="h-3.5 w-3.5 text-slate-400" />
-            <span className="hidden sm:inline">CLI Repo</span>
-            <ExternalLink className="h-3 w-3 text-slate-500" />
-          </a>
+            <PlusCircle className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="hidden sm:inline">Add Group</span>
+          </button>
 
           {/* Lock Dashboard */}
           {onLock && (

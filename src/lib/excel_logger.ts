@@ -17,10 +17,17 @@ export interface JobPostRecord {
   status: "Success" | "Failed";
 }
 
-const EXCEL_PATH = path.join(process.cwd(), "posted_jobs_ledger.xlsx");
+export function getExcelPath(): string {
+  if (process.env.VERCEL) {
+    return path.join("/tmp", "posted_jobs_ledger.xlsx");
+  }
+  return path.join(process.cwd(), "posted_jobs_ledger.xlsx");
+}
 
 export function recordPostsToExcel(records: JobPostRecord[]) {
   if (records.length === 0) return;
+
+  const excelPath = getExcelPath();
 
   const now = new Date();
   // Format for IST (UTC + 5:30)
@@ -44,8 +51,8 @@ export function recordPostsToExcel(records: JobPostRecord[]) {
   let summaryRows: any[] = [];
 
   try {
-    if (fs.existsSync(EXCEL_PATH)) {
-      wb = XLSX.readFile(EXCEL_PATH);
+    if (fs.existsSync(excelPath)) {
+      wb = XLSX.readFile(excelPath);
       if (wb.Sheets["All Posted Jobs"]) {
         allRows = XLSX.utils.sheet_to_json(wb.Sheets["All Posted Jobs"]);
       }
@@ -143,16 +150,22 @@ export function recordPostsToExcel(records: JobPostRecord[]) {
   wb.SheetNames = ["All Posted Jobs", "Daily Summary"];
 
   try {
-    XLSX.writeFile(wb, EXCEL_PATH);
+    XLSX.writeFile(wb, excelPath);
   } catch (err) {
     console.error("Failed to write Excel file:", err);
   }
 }
 
 export function getExcelBuffer(): Buffer | null {
+  const excelPath = getExcelPath();
   try {
-    if (fs.existsSync(EXCEL_PATH)) {
-      return fs.readFileSync(EXCEL_PATH);
+    if (fs.existsSync(excelPath)) {
+      return fs.readFileSync(excelPath);
+    }
+    // Also check root cwd if on vercel and not in tmp
+    const fallbackRoot = path.join(process.cwd(), "posted_jobs_ledger.xlsx");
+    if (fs.existsSync(fallbackRoot)) {
+      return fs.readFileSync(fallbackRoot);
     }
   } catch {}
   return null;

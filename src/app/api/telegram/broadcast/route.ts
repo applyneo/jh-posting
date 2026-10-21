@@ -11,6 +11,7 @@ import {
   TelegramConfig,
 } from "@/lib/telegram";
 import { recordPostsToExcel, JobPostRecord } from "@/lib/excel_logger";
+import { syncToGoogleSheet } from "@/lib/google_sheet_logger";
 import { Job } from "@/types/job";
 
 const FREEHIRE_API = "https://freehire.me/api/v1/agent/jobs/search";
@@ -205,6 +206,13 @@ export async function POST(req: NextRequest) {
 
     savePostedHistory(newlyPosted);
     recordPostsToExcel(excelRecords);
+
+    // Sync to Google Sheet if GOOGLE_SHEET_WEBHOOK_URL is configured
+    try {
+      await syncToGoogleSheet(excelRecords);
+    } catch (sheetErr) {
+      console.warn("Google Sheet sync warning:", sheetErr);
+    }
 
     return NextResponse.json({
       ok: true,

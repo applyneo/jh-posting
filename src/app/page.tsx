@@ -19,6 +19,9 @@ import {
   Briefcase,
   CheckCircle,
   Send,
+  FileSpreadsheet,
+  Settings,
+  PlusCircle,
 } from "lucide-react";
 
 const INITIAL_FILTERS: FilterState = {
@@ -81,6 +84,59 @@ export default function HomePage() {
       sessionStorage.removeItem("jh_admin_auth");
     } catch {}
     setIsAuthenticated(false);
+  };
+
+  // One-Click Post state
+  const [isOneClickPosting, setIsOneClickPosting] = useState(false);
+  const [oneClickResult, setOneClickResult] = useState<{
+    ok: boolean;
+    message: string;
+    totalDelivered?: number;
+    jobs?: any[];
+  } | null>(null);
+  const [oneClickError, setOneClickError] = useState<string | null>(null);
+
+  const handleOneClickPost = async () => {
+    setIsOneClickPosting(true);
+    setOneClickError(null);
+    setOneClickResult(null);
+
+    try {
+      let customGroups = null;
+      try {
+        const stored = localStorage.getItem("jobhunger_tg_groups");
+        if (stored) {
+          customGroups = JSON.parse(stored);
+        }
+      } catch {}
+
+      const payload: any = {
+        bot_token: "8874114044:AAG90TZQB42JdZEH17Ngdeu1hJysQgwF4NU",
+      };
+      if (customGroups) {
+        payload.groups = customGroups;
+      }
+
+      const res = await fetch("/api/telegram/broadcast", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": "Chitu@123",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setOneClickResult(data);
+      } else {
+        setOneClickError(data.error || "Failed to broadcast jobs.");
+      }
+    } catch (err: any) {
+      setOneClickError(err?.message || "Network error while broadcasting.");
+    } finally {
+      setIsOneClickPosting(false);
+    }
   };
 
   // Load saved jobs from localStorage on mount
@@ -194,6 +250,7 @@ export default function HomePage() {
         savedCount={savedJobs.length}
         onOpenSaved={() => setIsSavedDrawerOpen(true)}
         onOpenTelegram={() => setIsTelegramModalOpen(true)}
+        onOpenAddGroup={() => setIsTelegramModalOpen(true)}
         onLock={handleLock}
       />
 
@@ -219,14 +276,99 @@ export default function HomePage() {
               Aggregated continuously from Greenhouse, Lever, Workday, Ashby, and top company career pages. Zero spam, direct application links.
             </p>
 
-            <div className="pt-2 flex justify-center">
-              <button
-                onClick={() => setIsTelegramModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 hover:from-blue-500 hover:to-indigo-500 transition active:scale-95"
-              >
-                <Send className="h-4 w-4" />
-                <span>Telegram Broadcast Hub (Post 9 Jobs / 8:40 PM Cron)</span>
-              </button>
+            {/* One-Click Broadcast & Hub Controls */}
+            <div className="pt-2 flex flex-col items-center gap-3">
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <button
+                  onClick={handleOneClickPost}
+                  disabled={isOneClickPosting}
+                  className={`inline-flex items-center gap-2.5 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-xl transition active:scale-95 ${
+                    isOneClickPosting
+                      ? "bg-indigo-700/80 cursor-wait ring-2 ring-indigo-400"
+                      : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-indigo-500/30"
+                  }`}
+                >
+                  {isOneClickPosting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      <span>Broadcasting 9 Jobs to Telegram...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      <span>One-Click Post 9 Jobs (Tech • Non-Tech • Health)</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setIsTelegramModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition"
+                  title="Configure Telegram destinations and view details"
+                >
+                  <Settings className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Manage Groups & Hub</span>
+                </button>
+              </div>
+
+              {/* Live Broadcast Results Card */}
+              {oneClickResult && (
+                <div className="w-full max-w-xl mx-auto rounded-2xl border border-emerald-500/30 bg-emerald-950/40 p-4 text-left backdrop-blur-md shadow-2xl space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+                      <CheckCircle className="h-5 w-5 shrink-0" />
+                      <span>{oneClickResult.message}</span>
+                    </div>
+                    <button
+                      onClick={() => setOneClickResult(null)}
+                      className="text-slate-400 hover:text-white text-xs p-1"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-emerald-300">
+                      💻 3 Tech Jobs
+                    </div>
+                    <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-emerald-300">
+                      💼 3 Non-Tech Jobs
+                    </div>
+                    <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 text-emerald-300">
+                      🩺 3 Healthcare Jobs
+                    </div>
+                    {typeof oneClickResult.totalDelivered === "number" && (
+                      <div className="rounded-lg bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 text-indigo-300">
+                        📢 {oneClickResult.totalDelivered} Total Delivered
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-emerald-900/40 text-xs">
+                    <a
+                      href="/api/telegram/download-excel"
+                      download="JobHunger_Telegram_Posting_Ledger.xlsx"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-3 py-1.5 transition shadow-sm"
+                    >
+                      <FileSpreadsheet className="h-3.5 w-3.5" />
+                      <span>Download Backend Excel Ledger (.xlsx)</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Error Notification */}
+              {oneClickError && (
+                <div className="w-full max-w-xl mx-auto rounded-xl border border-rose-500/30 bg-rose-950/40 p-3 text-left text-xs text-rose-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                    <span>{oneClickError}</span>
+                  </div>
+                  <button onClick={() => setOneClickError(null)} className="text-slate-400 hover:text-white">
+                    ✕
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Quick search tags */}
