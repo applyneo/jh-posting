@@ -1,18 +1,20 @@
 "use client";
 
 import React from "react";
-import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2 } from "lucide-react";
+import { Briefcase, Bookmark, Sparkles, ExternalLink, Globe2, Send } from "lucide-react";
 
 interface HeaderProps {
   totalJobs?: number;
   savedCount: number;
   onOpenSaved: () => void;
+  onOpenTelegram: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   totalJobs,
   savedCount,
   onOpenSaved,
+  onOpenTelegram,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
@@ -47,6 +49,16 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Telegram Auto-Poster button */}
+          <button
+            onClick={onOpenTelegram}
+            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-indigo-600/30 hover:bg-indigo-500 transition active:scale-95"
+            title="Open Telegram Auto-Poster"
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span className="font-medium">Telegram Post</span>
+          </button>
+
           {/* Saved Jobs button */}
           <button
             onClick={onOpenSaved}

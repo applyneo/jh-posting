@@ -8,6 +8,8 @@ export interface JobEnrichment {
   salary_min?: number;
   salary_max?: number;
   salary_currency?: string;
+  salary_period?: string;
+  experience_years_min?: number;
 }
 
 export interface JobReality {

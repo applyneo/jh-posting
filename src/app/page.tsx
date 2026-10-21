@@ -6,6 +6,7 @@ import { SearchFilters, FilterState } from "@/components/SearchFilters";
 import { JobCard } from "@/components/JobCard";
 import { JobModal } from "@/components/JobModal";
 import { SavedJobsDrawer } from "@/components/SavedJobsDrawer";
+import { TelegramAdminModal } from "@/components/TelegramAdminModal";
 import { Job, SearchResponse } from "@/types/job";
 import {
   Sparkles,
@@ -16,6 +17,7 @@ import {
   AlertCircle,
   Briefcase,
   CheckCircle,
+  Send,
 } from "lucide-react";
 
 const INITIAL_FILTERS: FilterState = {
@@ -52,6 +54,7 @@ export default function HomePage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [savedJobs, setSavedJobs] = useState<Job[]>([]);
   const [isSavedDrawerOpen, setIsSavedDrawerOpen] = useState(false);
+  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
 
   // Load saved jobs from localStorage on mount
   useEffect(() => {
@@ -148,6 +151,7 @@ export default function HomePage() {
         totalJobs={total}
         savedCount={savedJobs.length}
         onOpenSaved={() => setIsSavedDrawerOpen(true)}
+        onOpenTelegram={() => setIsTelegramModalOpen(true)}
       />
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
@@ -171,6 +175,16 @@ export default function HomePage() {
             <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
               Aggregated continuously from Greenhouse, Lever, Workday, Ashby, and top company career pages. Zero spam, direct application links.
             </p>
+
+            <div className="pt-2 flex justify-center">
+              <button
+                onClick={() => setIsTelegramModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-lg shadow-indigo-500/25 hover:from-blue-500 hover:to-indigo-500 transition active:scale-95"
+              >
+                <Send className="h-4 w-4" />
+                <span>Telegram Broadcast Hub (Post 9 Jobs / 8:40 PM Cron)</span>
+              </button>
+            </div>
 
             {/* Quick search tags */}
             <div className="pt-2 flex flex-wrap justify-center items-center gap-1.5 text-xs">
@@ -399,6 +413,12 @@ export default function HomePage() {
           setIsSavedDrawerOpen(false);
           setSelectedJob(job);
         }}
+      />
+
+      {/* Telegram Admin & Auto-Poster Modal */}
+      <TelegramAdminModal
+        isOpen={isTelegramModalOpen}
+        onClose={() => setIsTelegramModalOpen(false)}
       />
     </div>
   );

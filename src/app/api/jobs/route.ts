@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
     for (const key of allowedParams) {
       const values = searchParams.getAll(key);
       for (const val of values) {
-        if (val) apiUrl.searchParams.append(key, val);
+        if (val) {
+          // FreeHire API expects plural 'countries'
+          const apiParamKey = key === "country" ? "countries" : key;
+          apiUrl.searchParams.append(apiParamKey, val);
+        }
       }
     }
 
