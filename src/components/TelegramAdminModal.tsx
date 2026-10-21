@@ -36,22 +36,22 @@ export const TelegramAdminModal: React.FC<TelegramAdminModalProps> = ({ isOpen, 
   const [authError, setAuthError] = useState("");
 
   const [techGroups, setTechGroups] = useState<string[]>([
-    "-1004456666849", // USA Tech Channel
-    "-1004428862449", // US JOBS - IT DOMAIN Channel (@usjobsinit)
-    "-1004318742358", // USA Tech Jobs Community Group
-    "-1003899747167", // US IT JOBS AND INTERVIEW Group (@Jobhungerai)
-    "-1004305785977", // US JOB OPORTUNITY Group
+    "-1004456666849", // USA Tech Jobs & Software Careers (Channel)
+    "-1004318742358", // USA Tech Jobs Community & Referrals (Group)
+    "-1003882722879", // US JOBS AND OPT - IT DOMAIN (Group)
   ]);
   const [nonTechGroups, setNonTechGroups] = useState<string[]>([
-    "-1004474267352", // USA Non-Tech Channel
-    "-1004406851780", // US JOBS - NON IT Channel (@nonitjobsinus)
-    "-1004462814167", // USA Non-Tech Career Hub Group
-    "-1003882722879", // US JOBS AND OPT Group (@usafulltimejobs)
+    "-1004474267352", // USA Non-Tech & Corporate Jobs (Channel)
+    "-1004428862449", // US JOBS - H1B - NON TECH DOMAIN (Channel)
+    "-1004406851780", // US JOBS, H1B - FULL TIME JOBS (Channel)
+    "-1004462814167", // USA Non-Tech Career Hub (Group)
+    "-1004305785977", // US JOB OPORTUNITY - NON IT (Group)
   ]);
   const [healthGroups, setHealthGroups] = useState<string[]>([
-    "-1004461057036", // USA Healthcare Channel
-    "-1003942741539", // US JOBS MEDICAL DOMAIN Channel (@usjobsjobs)
-    "-1004475061975", // USA Healthcare Group
+    "-1004461057036", // USA Healthcare & Nursing Jobs (Channel)
+    "-1003942741539", // US JOBS MEDICAL DOMAIN, H1B - HEALTHCARE (Channel)
+    "-1004475061975", // USA Healthcare Jobs & Medical Network (Group)
+    "-1003899747167", // US IT JOBS - OPT - HEALTHCARE (Group)
   ]);
 
   const [newChatId, setNewChatId] = useState("");
